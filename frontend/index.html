@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0A0A0F" />
+    <meta
+      name="description"
+      content="LawBot - AI-Powered Indian Corporate Law Copilot. Draft contracts, ensure compliance, and get instant legal insights."
+    />
+    <meta property="og:title" content="LawBot - AI Indian Corporate Law Copilot" />
+    <meta
+      property="og:description"
+      content="Draft contracts, ensure compliance, and get instant legal insights powered by AI."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Preconnect for Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>LawBot - AI Indian Corporate Law Copilot</title>
+
+    <style>
+      /* Critical loading styles to prevent FOUC */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #0a0a0f;
+        color: #f8fafc;
+        min-height: 100vh;
+      }
+
+      #root {
+        min-height: 100vh;
+      }
+
+      /* Initial loading screen */
+      .initial-loader {
+        position: fixed;
+        inset: 0;
+        background: #0a0a0f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+      }
+
+      .initial-loader.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .loader-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .loader-logo {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        animation: loader-pulse 1.5s ease-in-out infinite;
+      }
+
+      .loader-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .loader-bar {
+        width: 200px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 1px;
+        overflow: hidden;
+      }
+
+      .loader-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #06b6d4, #8b5cf6);
+        background-size: 200% 100%;
+        animation: loader-shimmer 1.5s ease infinite;
+        border-radius: 1px;
+      }
+
+      @keyframes loader-pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 40px rgba(6, 182, 212, 0.6);
+        }
+      }
+
+      @keyframes loader-shimmer {
+        0% {
+          background-position: -200% 0;
+          width: 0%;
+        }
+        50% {
+          width: 100%;
+        }
+        100% {
+          background-position: 200% 0;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Initial loading screen shown before React hydrates -->
+    <div class="initial-loader" id="initial-loader">
+      <div class="loader-content">
+        <div class="loader-logo">⚖️</div>
+        <div class="loader-text">LawBot</div>
+        <div class="loader-bar">
+          <div class="loader-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.tsx"></script>
+
+    <script>
+      // Hide initial loader once React has mounted
+      window.__hideInitialLoader = function () {
+        const loader = document.getElementById('initial-loader')
+        if (loader) {
+          loader.classList.add('hidden')
+          setTimeout(() => loader.remove(), 500)
+        }
+      }
+    </script>
+  </body>
+</html>

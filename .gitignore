@@ -1,0 +1,113 @@
+# ============================================================
+# LawBot .gitignore
+# ============================================================
+
+# ---- Python / Backend ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+*.log
+.hypothesis/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# ---- Node / Frontend ----
+node_modules/
+dist/
+dist-ssr/
+*.local
+.cache/
+.parcel-cache/
+
+# ---- Environment Files ----
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ---- Database ----
+*.db
+*.sqlite
+*.sqlite3
+
+# ---- IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ---- Docker ----
+.docker/
+
+# ---- AI / ML Models ----
+*.bin
+*.pt
+*.pth
+*.pkl
+models/
+model_cache/
+
+# ---- Uploads / Storage ----
+backend/uploads/
+backend/storage/
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- Redis / Celery ----
+celerybeat-schedule
+celerybeat.pid
+*.rdb
+
+# ---- Alembic ----
+# (don't ignore alembic/versions - these should be committed)
+
+# ---- Qdrant ----
+qdrant_storage/
+
+# ---- TypeScript ----
+*.tsbuildinfo
+
+# ---- Testing ----
+coverage/
+.nyc_output/
+
+# ---- Package lock files ----
+# Keep package-lock.json
+# yarn.lock is OK too
