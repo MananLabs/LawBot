@@ -76,7 +76,7 @@ def create_application() -> FastAPI:
 
 def _register_routers(app: FastAPI) -> None:
     """Register all API routers."""
-    from app.routes import auth, chat, documents, contracts, generator, compliance
+    from app.routes import auth, chat, documents, contracts, generator, compliance, export
 
     # Routers define their own prefix (e.g. prefix="/auth"), we add the base /api/v1
     API_PREFIX = "/api/v1"
@@ -87,6 +87,7 @@ def _register_routers(app: FastAPI) -> None:
     app.include_router(contracts.router, prefix=API_PREFIX)
     app.include_router(generator.router, prefix=API_PREFIX)
     app.include_router(compliance.router, prefix=API_PREFIX)
+    app.include_router(export.router, prefix=API_PREFIX)
 
 
 def _register_exception_handlers(app: FastAPI) -> None:
