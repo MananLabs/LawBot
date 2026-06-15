@@ -11,7 +11,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_current_active_user
+from app.core.dependencies import get_current_active_user, _DUMMY_USER_ID, _make_dummy_user
 from app.database import get_db
 from app.models.user import User
 from app.schemas.auth import (
@@ -123,6 +123,19 @@ def _tokens_to_frontend(tokens: TokenResponse) -> dict:
     return {"access": tokens.access, "refresh": tokens.refresh}
 
 
+def _dummy_auth_response(message: str) -> dict:
+    """Return a full auth response for the test account without touching the DB."""
+    from app.core.security import create_access_token, create_refresh_token
+    dummy_user = _make_dummy_user()
+    access = create_access_token(subject=str(_DUMMY_USER_ID))
+    refresh = create_refresh_token(subject=str(_DUMMY_USER_ID))
+    return {
+        "user": _user_to_frontend(dummy_user),  # type: ignore[arg-type]
+        "tokens": {"access": access, "refresh": refresh},
+        "message": message,
+    }
+
+
 # ─── Register ─────────────────────────────────────────────────────────────────
 
 async def _do_register(request: RegisterRequest, db: AsyncSession) -> dict:
@@ -148,6 +161,10 @@ async def register_slash(request: RegisterRequest, db: AsyncSession = Depends(ge
 # ─── Login ────────────────────────────────────────────────────────────────────
 
 async def _do_login(request: LoginRequest, db: AsyncSession) -> dict:
+    # ── Dummy bypass ──────────────────────────────────────────────────────
+    if request.email == "test@lawbot.com" and request.password == "Test1234":
+        return _dummy_auth_response("Login successful.")
+    # ─────────────────────────────────────────────────────────────────────
     auth_service = AuthService(db)
     user, tokens = await auth_service.login(request)
     return {
@@ -170,6 +187,12 @@ async def login_slash(request: LoginRequest, db: AsyncSession = Depends(get_db))
 # ─── Refresh ──────────────────────────────────────────────────────────────────
 
 async def _do_refresh(refresh_token: str, db: AsyncSession) -> dict:
+    # ── Dummy bypass ──────────────────────────────────────────────────────
+    from app.core.security import verify_refresh_token
+    uid = verify_refresh_token(refresh_token)
+    if uid and uid == str(_DUMMY_USER_ID):
+        return _dummy_auth_response("Token refreshed.")
+    # ─────────────────────────────────────────────────────────────────────
     auth_service = AuthService(db)
     tokens = await auth_service.refresh_tokens(refresh_token)
     return _tokens_to_frontend(tokens)

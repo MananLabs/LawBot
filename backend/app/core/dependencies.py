@@ -1,7 +1,9 @@
 """
 FastAPI dependency injection providers.
 """
+import types
 import uuid
+from datetime import datetime, timezone
 from typing import AsyncGenerator, Optional
 
 from fastapi import Depends, HTTPException, status
@@ -11,6 +13,32 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.core.security import verify_access_token
 from app.models.user import User
+
+# ── Dummy test account (no DB required) ──────────────────────────────────────
+_DUMMY_USER_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
+_DUMMY_EMAIL = "test@lawbot.com"
+_DUMMY_PASSWORD = "Test1234"
+
+
+def _make_dummy_user():
+    """Return a SimpleNamespace that mirrors a User ORM instance."""
+    from app.models.user import UserType, SubscriptionTier
+    u = types.SimpleNamespace()
+    u.id = _DUMMY_USER_ID
+    u.email = _DUMMY_EMAIL
+    u.full_name = "Test User"
+    u.hashed_password = ""
+    u.user_type = UserType.FOUNDER
+    u.subscription_tier = SubscriptionTier.FREE
+    u.is_active = True
+    u.is_verified = True
+    u.company_name = None
+    u.phone_number = None
+    _epoch = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    u.created_at = _epoch
+    u.updated_at = _epoch
+    return u
+# ─────────────────────────────────────────────────────────────────────────────
 
 # HTTP Bearer scheme for JWT extraction
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -43,6 +71,15 @@ async def get_current_user(
     user_id = verify_access_token(credentials.credentials)
     if not user_id:
         raise credentials_exception
+
+    # ── Dummy bypass — no DB needed ───────────────────────────────────────
+    try:
+        parsed_id = uuid.UUID(user_id)
+    except ValueError:
+        raise credentials_exception
+    if parsed_id == _DUMMY_USER_ID:
+        return _make_dummy_user()  # type: ignore[return-value]
+    # ─────────────────────────────────────────────────────────────────────
 
     # Import here to avoid circular imports
     from app.repositories.user import UserRepository
@@ -107,6 +144,13 @@ async def get_optional_user(
     user_id = verify_access_token(credentials.credentials)
     if not user_id:
         return None
+
+    try:
+        parsed_id = uuid.UUID(user_id)
+    except ValueError:
+        return None
+    if parsed_id == _DUMMY_USER_ID:
+        return _make_dummy_user()  # type: ignore[return-value]
 
     from app.repositories.user import UserRepository
     user_repo = UserRepository(db)

@@ -1,88 +1,101 @@
 import { useRef, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Sphere, MeshDistortMaterial } from '@react-three/drei'
-import * as THREE from 'three'
 import { ChevronDown, ArrowRight, Sparkles } from 'lucide-react'
 
 // =====================================================================
-// 3D ANIMATED SPHERE
+// CSS ANIMATED SPHERE (replaces @react-three/fiber WebGL canvas)
 // =====================================================================
-function AnimatedSphere({
-  mouseX,
-  mouseY,
-}: {
-  mouseX: number
-  mouseY: number
-}) {
-  const meshRef = useRef<THREE.Mesh>(null)
-
-  useFrame((state) => {
-    if (!meshRef.current) return
-    const t = state.clock.elapsedTime
-    meshRef.current.rotation.x = t * 0.15 + mouseY * 0.3
-    meshRef.current.rotation.y = t * 0.2 + mouseX * 0.3
-    meshRef.current.rotation.z = t * 0.1
-  })
-
+function AnimatedSphere({ mouseX, mouseY }: { mouseX: number; mouseY: number }) {
   return (
-    <Sphere ref={meshRef} args={[1.5, 100, 100]} scale={1}>
-      <MeshDistortMaterial
-        color="#3B82F6"
-        attach="material"
-        distort={0.45}
-        speed={2.5}
-        roughness={0}
-        metalness={0.1}
-        opacity={0.85}
-        transparent
+    <div className="absolute inset-0 flex items-center justify-center">
+      {/* Outer glow */}
+      <motion.div
+        animate={{ scale: [1, 1.06, 1], opacity: [0.6, 0.9, 0.6] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute w-72 h-72 rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle at 30% 30%, rgba(139,92,246,0.25) 0%, rgba(59,130,246,0.15) 50%, transparent 70%)',
+          filter: 'blur(40px)',
+        }}
       />
-    </Sphere>
-  )
-}
 
-// =====================================================================
-// PARTICLE FIELD
-// =====================================================================
-function ParticleField() {
-  const pointsRef = useRef<THREE.Points>(null)
-  const count = 300
-  const positions = new Float32Array(count * 3)
-
-  for (let i = 0; i < count; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 10
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 10
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 10
-  }
-
-  useFrame((state) => {
-    if (!pointsRef.current) return
-    pointsRef.current.rotation.y = state.clock.elapsedTime * 0.04
-    pointsRef.current.rotation.x = state.clock.elapsedTime * 0.02
-  })
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
+      {/* Main sphere */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+        style={{
+          translateX: mouseX * 10,
+          translateY: -mouseY * 10,
+        }}
+        className="w-56 h-56 rounded-full relative"
+      >
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background:
+              'radial-gradient(circle at 35% 30%, rgba(147,197,253,0.9) 0%, rgba(59,130,246,0.85) 35%, rgba(37,99,235,0.8) 60%, rgba(17,24,39,0.6) 100%)',
+            boxShadow:
+              '0 0 60px rgba(59,130,246,0.5), 0 0 120px rgba(59,130,246,0.2), inset -20px -20px 60px rgba(0,0,0,0.5)',
+          }}
         />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.03}
-        color="#06B6D4"
-        sizeAttenuation
-        transparent
-        opacity={0.6}
-      />
-    </points>
+        {/* Specular highlight */}
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: '35%',
+            height: '25%',
+            top: '15%',
+            left: '20%',
+            background:
+              'radial-gradient(ellipse, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.1) 70%, transparent 100%)',
+            filter: 'blur(4px)',
+          }}
+        />
+        {/* Distortion bands */}
+        <motion.div
+          animate={{ rotate: -360 }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+          className="absolute inset-2 rounded-full overflow-hidden opacity-20"
+        >
+          {[0, 30, 60, 90, 120, 150].map((deg) => (
+            <div
+              key={deg}
+              className="absolute inset-0 rounded-full border border-cyan-400/40"
+              style={{ transform: `rotate(${deg}deg) scaleX(0.35)` }}
+            />
+          ))}
+        </motion.div>
+      </motion.div>
+
+      {/* Orbiting particle ring */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+        className="absolute w-80 h-80 rounded-full"
+        style={{ border: '1px solid rgba(6,182,212,0.12)' }}
+      >
+        {[0, 60, 120, 180, 240, 300].map((deg) => (
+          <motion.div
+            key={deg}
+            animate={{ scale: [1, 1.5, 1], opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 2, repeat: Infinity, delay: deg / 360 * 2 }}
+            className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400"
+            style={{
+              top: '50%',
+              left: '50%',
+              transform: `rotate(${deg}deg) translateX(160px) translateY(-50%)`,
+            }}
+          />
+        ))}
+      </motion.div>
+    </div>
   )
 }
 
 // =====================================================================
-// NETWORK NODES BACKGROUND (Canvas API)
+// NETWORK NODES BACKGROUND (Canvas API — no external dependencies)
 // =====================================================================
 function NetworkCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -117,7 +130,6 @@ function NetworkCanvas() {
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Update positions
       for (const n of nodes) {
         n.x += n.vx
         n.y += n.vy
@@ -125,7 +137,6 @@ function NetworkCanvas() {
         if (n.y < 0 || n.y > canvas.height) n.vy *= -1
       }
 
-      // Draw connections
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x
@@ -143,7 +154,6 @@ function NetworkCanvas() {
         }
       }
 
-      // Draw nodes
       for (const n of nodes) {
         ctx.beginPath()
         ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2)
@@ -161,12 +171,7 @@ function NetworkCanvas() {
     }
   }, [])
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full opacity-40"
-    />
-  )
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-40" />
 }
 
 // =====================================================================
@@ -322,14 +327,14 @@ export default function HeroSection() {
           </motion.div>
         </div>
 
-        {/* Right 3D Sphere */}
+        {/* Right — CSS Sphere */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
           className="flex-shrink-0 w-[400px] h-[400px] lg:w-[500px] lg:h-[500px] relative"
         >
-          {/* Glow rings */}
+          {/* Outer glow rings */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-80 h-80 rounded-full border border-blue-500/10 animate-ping" style={{ animationDuration: '3s' }} />
           </div>
@@ -337,17 +342,7 @@ export default function HeroSection() {
             <div className="w-96 h-96 rounded-full border border-cyan-500/5" />
           </div>
 
-          <Canvas
-            camera={{ position: [0, 0, 4], fov: 45 }}
-            style={{ background: 'transparent' }}
-          >
-            <ambientLight intensity={0.3} />
-            <directionalLight position={[5, 5, 5]} intensity={1.2} color="#3B82F6" />
-            <directionalLight position={[-5, -5, -3]} intensity={0.4} color="#06B6D4" />
-            <pointLight position={[0, 0, 3]} intensity={0.8} color="#8B5CF6" />
-            <AnimatedSphere mouseX={mousePos.x} mouseY={mousePos.y} />
-            <ParticleField />
-          </Canvas>
+          <AnimatedSphere mouseX={mousePos.x} mouseY={mousePos.y} />
 
           {/* Floating Labels */}
           <motion.div

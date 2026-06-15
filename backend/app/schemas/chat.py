@@ -62,7 +62,7 @@ class MessageResponse(BaseModel):
     model_used: Optional[str] = None
     created_at: datetime
 
-    model_config = {"from_attributes": True, "populate_by_name": True}
+    model_config = {"from_attributes": True, "populate_by_name": True, "protected_namespaces": ()}
 
 
 class ConversationCreate(BaseModel):
@@ -103,6 +103,8 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     """Full AI chat response."""
+    model_config = {"protected_namespaces": ()}
+
     conversation_id: uuid.UUID
     message_id: uuid.UUID
     role: MessageRole = MessageRole.ASSISTANT
