@@ -76,12 +76,15 @@ def create_application() -> FastAPI:
 
 def _register_routers(app: FastAPI) -> None:
     """Register all API routers."""
-    from app.routes import auth, chat, documents, contracts, generator, compliance, export
+    from app.routes import auth, chat, documents, contracts, generator, compliance, export, sessions
 
     # Routers define their own prefix (e.g. prefix="/auth"), we add the base /api/v1
     API_PREFIX = "/api/v1"
 
     app.include_router(auth.router, prefix=API_PREFIX)
+    # sessions.py provides /chat/sessions/* (frontend-compatible URL scheme)
+    app.include_router(sessions.router, prefix=API_PREFIX)
+    # chat.py provides /chat/conversations/* (legacy, kept for compatibility)
     app.include_router(chat.router, prefix=API_PREFIX)
     app.include_router(documents.router, prefix=API_PREFIX)
     app.include_router(contracts.router, prefix=API_PREFIX)
